@@ -3,22 +3,35 @@ import type { FormEvent, ChangeEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../../services/api";
+import {
+  getLineasPorCategoriaYTipo,
+  getTiposPorCategoria,
+} from "../../services/producto_services";
 
 import type { Marca } from "../../types/marca_type";
-import type { Categoria } from "../../types/categoria_types";
-import type { Producto } from "../../types/products_type";
+import type {
+  Producto,
+  ProductoCategoria,
+  ProductoMarca,
+  ProductoTipo,
+} from "../../types/products_type";
 
 function AdminCrearProductoPage() {
   const navigate = useNavigate();
 
   const [marcas, setMarcas] = useState<Marca[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [categorias, setCategorias] = useState<ProductoCategoria[]>([]);
 
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [precio, setPrecio] = useState("");
   const [marcaId, setMarcaId] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+  const [tipoId, setTipoId] = useState("");
+  const [lineaId, setLineaId] = useState("");
+  const [tipos, setTipos] = useState<ProductoTipo[]>([]);
+  const [lineas, setLineas] = useState<ProductoMarca[]>([]);
   const [destacado, setDestacado] = useState(false);
   const [activo, setActivo] = useState(true);
 
@@ -44,8 +57,8 @@ function AdminCrearProductoPage() {
         setError(null);
 
         const [marcasResponse, categoriasResponse] = await Promise.all([
-          apiFetch<Marca[]>("/marcas/"),
-          apiFetch<Categoria[]>("/categorias/"),
+          apiFetch<Marca[]>("/marcas/?solo_activas=true"),
+          apiFetch<ProductoCategoria[]>("/categorias/?solo_activas=true"),
         ]);
 
         setMarcas(marcasResponse);
@@ -61,6 +74,22 @@ function AdminCrearProductoPage() {
 
     cargarDatos();
   }, []);
+
+  useEffect(() => {
+    if (!categoriaId) { setTipos([]); return; }
+    getTiposPorCategoria(Number(categoriaId))
+      .then((respuesta) => {
+        setTipos(respuesta);
+        if (respuesta.length === 0) setTipoId(categoriaId);
+      })
+      .catch(() => setTipos([]));
+  }, [categoriaId]);
+
+  useEffect(() => {
+    if (!categoriaId || !tipoId) { setLineas([]); return; }
+    getLineasPorCategoriaYTipo(Number(categoriaId), Number(tipoId))
+      .then(setLineas).catch(() => setLineas([]));
+  }, [categoriaId, tipoId]);
 
   // ==========================================
   // SELECCIONAR IMÁGENES
@@ -116,8 +145,11 @@ function AdminCrearProductoPage() {
           nombre,
           codigo,
           descripcion: descripcion || null,
+          precio: precio ? Number(precio) : null,
           marca_id: Number(marcaId),
           categoria_id: Number(categoriaId),
+          tipo_id: Number(tipoId),
+          linea_id: lineaId ? Number(lineaId) : null,
           destacado,
           activo,
         }),
@@ -228,7 +260,7 @@ function AdminCrearProductoPage() {
         <div className="grid gap-6 sm:grid-cols-2">
           {/* NOMBRE */}
 
-          <div className="sm:col-span-2">
+          <div>
             <label className="text-sm font-medium text-slate-700">Nombre</label>
 
             <input
@@ -254,6 +286,13 @@ function AdminCrearProductoPage() {
               className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
               placeholder="Ej: AC-421"
             />
+          </div>
+
+          {/* MARCA */}
+
+          <div>
+            <label className="text-sm font-medium text-slate-700">Precio</label>
+            <input type="number" min="0" step="0.01" value={precio} onChange={(event) => setPrecio(event.target.value)} className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900" placeholder="0.00" />
           </div>
 
           {/* MARCA */}
@@ -286,7 +325,7 @@ function AdminCrearProductoPage() {
 
             <select
               value={categoriaId}
-              onChange={(event) => setCategoriaId(event.target.value)}
+              onChange={(event) => { setCategoriaId(event.target.value); setTipoId(""); setLineaId(""); }}
               required
               className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-900"
             >
@@ -297,6 +336,22 @@ function AdminCrearProductoPage() {
                   {categoria.nombre}
                 </option>
               ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-slate-700">Tipo</label>
+            <select value={tipoId} onChange={(event) => { setTipoId(event.target.value); setLineaId(""); }} required disabled={Boolean(categoriaId) && tipos.length === 0} className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-900 disabled:opacity-60">
+              <option value="">{tipos.length === 0 && categoriaId ? "Sin tipo" : "Seleccionar tipo"}</option>
+              {tipos.map((tipo) => <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>)}
+            </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium text-slate-700">Línea técnica</label>
+            <select value={lineaId} onChange={(event) => setLineaId(event.target.value)} disabled={lineas.length === 0} className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-900 disabled:opacity-60">
+              <option value="">Sin línea técnica</option>
+              {lineas.map((linea) => <option key={linea.id} value={linea.id}>{linea.nombre}</option>)}
             </select>
           </div>
 

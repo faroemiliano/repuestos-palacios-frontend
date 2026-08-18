@@ -4,28 +4,55 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<T> {
-  const headers = new Headers(options?.headers);
-
-  // Solo enviar JSON cuando el body NO sea FormData
-  if (!(options?.body instanceof FormData)) {
-    headers.set("Content-Type", "application/json");
-  }
+  const isFormData = options?.body instanceof FormData;
+  const token =
+    localStorage.getItem("admin_token") ?? localStorage.getItem("cliente_token");
 
   const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-    headers,
+
+    headers: {
+      ...(isFormData
+        ? {}
+        : {
+            "Content-Type": "application/json",
+          }),
+
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+
+      ...options?.headers,
+    },
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
+    let body = "";
+
+    try {
+      body = await response.text();
+    } catch {
+      // No hacemos nada
+    }
 
     console.error("❌ ERROR API:", {
       status: response.status,
       statusText: response.statusText,
-      body: errorText,
+      body,
     });
 
-    throw new Error(`Error ${response.status}: ${response.statusText}`);
+    let detail = "";
+    try {
+      const parsed = JSON.parse(body) as { detail?: string };
+      detail = parsed.detail ?? "";
+    } catch {
+      detail = body;
+    }
+
+    throw new Error(detail || `Error ${response.status}: ${response.statusText}`);
+  }
+
+  // 204 No Content
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;

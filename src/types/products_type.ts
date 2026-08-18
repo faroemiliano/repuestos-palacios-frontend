@@ -8,6 +8,11 @@ export interface ProductoMarca {
   nombre: string;
 }
 
+export interface ProductoTipo {
+  id: number;
+  nombre: string;
+}
+
 export interface ProductoImagen {
   id: number;
   url: string;
@@ -28,8 +33,11 @@ export interface Producto {
   slug: string;
   codigo: string;
   descripcion: string | null;
+  precio: number | null;
 
   categoria_id: number;
+  tipo_id: number;
+  linea_id: number | null;
   marca_id: number;
 
   activo: boolean;
@@ -39,6 +47,8 @@ export interface Producto {
   actualizado_en: string;
 
   categoria?: ProductoCategoria;
+  tipo?: ProductoTipo;
+  linea?: ProductoCategoria;
   marca?: ProductoMarca;
   imagenes: ProductoImagen[];
   especificaciones: ProductoEspecificacion[];

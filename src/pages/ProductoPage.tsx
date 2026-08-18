@@ -272,6 +272,16 @@ function ProductoPage() {
             </div>
           )}
 
+          {producto.precio !== null ? (
+            <p className="mt-8 text-3xl font-bold text-slate-900">
+              {new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 2 }).format(producto.precio)}
+            </p>
+          ) : (
+            <Link to="/ingresar" className="mt-8 inline-block rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-900">
+              Ingresá para ver el precio
+            </Link>
+          )}
+
           {/* Botón */}
 
           <button

@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+import { getMediaUrl } from "../../services/api";
+
 import type { Producto } from "../../types/products_type";
 
 interface ProductoCardProps {
@@ -21,7 +23,7 @@ function ProductoCard({ producto }: ProductoCardProps) {
       <div className="aspect-square bg-slate-100">
         {imagen ? (
           <img
-            src={imagen.url}
+            src={getMediaUrl(imagen.url)}
             alt={producto.nombre}
             loading="lazy"
             className="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-105 sm:p-5"
@@ -47,6 +49,22 @@ function ProductoCard({ producto }: ProductoCardProps) {
         </h3>
 
         <p className="mt-2 text-sm text-slate-500">Código: {producto.codigo}</p>
+
+        {producto.precio !== null && (
+          <p className="mt-3 text-lg font-bold text-slate-900">
+            {new Intl.NumberFormat("es-AR", {
+              style: "currency",
+              currency: "ARS",
+              maximumFractionDigits: 2,
+            }).format(producto.precio)}
+          </p>
+        )}
+
+        {producto.precio === null && (
+          <p className="mt-3 text-sm font-semibold text-slate-600">
+            Ingresá para ver el precio
+          </p>
+        )}
 
         <span className="mt-auto pt-5 text-sm font-semibold text-slate-900 transition group-hover:translate-x-1">
           Ver producto →
