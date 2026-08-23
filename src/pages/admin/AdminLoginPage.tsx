@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import { loginWithGoogle } from "../../services/admin_auth_services";
+import logoRepuestosPalacios from "../../assets/logo-repuestos-palacios.png";
 
 function AdminLoginPage() {
   const navigate = useNavigate();
@@ -44,10 +45,20 @@ function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-brand-red/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-24 h-80 w-80 rounded-full bg-slate-300/40 blur-3xl" />
+
+      <div className="relative w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-300/30">
         <div className="text-center">
-          <p className="text-sm font-semibold uppercase tracking-widest text-slate-500">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+            <img
+              src={logoRepuestosPalacios}
+              alt="Repuestos Palacios"
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <p className="mt-6 text-xs font-bold uppercase tracking-[0.2em] text-brand-red">
             Repuestos Palacios
           </p>
 
