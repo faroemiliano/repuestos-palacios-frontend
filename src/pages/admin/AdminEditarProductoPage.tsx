@@ -38,6 +38,7 @@ function AdminEditarProductoPage() {
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [equivalencias, setEquivalencias] = useState("");
   const [precio, setPrecio] = useState("");
   const [marcaId, setMarcaId] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
@@ -90,6 +91,7 @@ function AdminEditarProductoPage() {
         setNombre(productoResponse.nombre);
         setCodigo(productoResponse.codigo);
         setDescripcion(productoResponse.descripcion ?? "");
+        setEquivalencias(productoResponse.equivalencias ?? "");
         setPrecio(productoResponse.precio?.toString() ?? "");
         setMarcaId(String(productoResponse.marca_id));
         setCategoriaId(String(productoResponse.categoria_id));
@@ -144,6 +146,7 @@ function AdminEditarProductoPage() {
         nombre,
         codigo,
         descripcion: descripcion || null,
+        equivalencias: equivalencias || null,
         precio: precio ? Number(precio) : null,
         marca_id: Number(marcaId),
         categoria_id: Number(categoriaId),
@@ -528,6 +531,23 @@ function AdminEditarProductoPage() {
               rows={5}
               className="mt-2 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
             />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium text-slate-700">
+              Equivalencias
+            </label>
+
+            <textarea
+              value={equivalencias}
+              onChange={(event) => setEquivalencias(event.target.value)}
+              rows={4}
+              className="mt-2 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+              placeholder="Códigos, nombres o productos similares equivalentes..."
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              Podés separar cada equivalencia con una coma o escribir una por línea.
+            </p>
           </div>
         </div>
 

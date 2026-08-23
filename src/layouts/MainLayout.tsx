@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import Chatbot from "../components/chatbot/Chatbot";
+import WhatsAppFloat from "../components/layout/WhatsAppFloat";
 
 function MainLayout() {
   return (
@@ -15,7 +15,7 @@ function MainLayout() {
 
       <Footer />
 
-      <Chatbot />
+      <WhatsAppFloat />
     </div>
   );
 }

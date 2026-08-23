@@ -148,6 +148,7 @@ export async function updateProducto(
     slug?: string;
     codigo?: string;
     descripcion?: string | null;
+    equivalencias?: string | null;
     precio?: number | null;
     categoria_id?: number;
     tipo_id?: number;

@@ -25,6 +25,7 @@ function AdminCrearProductoPage() {
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
   const [descripcion, setDescripcion] = useState("");
+  const [equivalencias, setEquivalencias] = useState("");
   const [precio, setPrecio] = useState("");
   const [marcaId, setMarcaId] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
@@ -145,6 +146,7 @@ function AdminCrearProductoPage() {
           nombre,
           codigo,
           descripcion: descripcion || null,
+          equivalencias: equivalencias || null,
           precio: precio ? Number(precio) : null,
           marca_id: Number(marcaId),
           categoria_id: Number(categoriaId),
@@ -435,6 +437,23 @@ function AdminCrearProductoPage() {
               className="mt-2 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
               placeholder="Descripción del producto..."
             />
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className="text-sm font-medium text-slate-700">
+              Equivalencias
+            </label>
+
+            <textarea
+              value={equivalencias}
+              onChange={(event) => setEquivalencias(event.target.value)}
+              rows={4}
+              className="mt-2 w-full resize-none rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+              placeholder="Códigos, nombres o productos similares equivalentes..."
+            />
+            <p className="mt-2 text-xs text-slate-500">
+              Podés separar cada equivalencia con una coma o escribir una por línea.
+            </p>
           </div>
         </div>
 

@@ -7,7 +7,12 @@ export interface ClientePerfil {
   email: string;
   telefono: string | null;
   foto: string | null;
+  estado: "pendiente" | "aprobado" | "rechazado";
   perfil_completo: boolean;
+}
+
+export interface ClienteSolicitud extends ClientePerfil {
+  creado_en: string;
 }
 
 interface ClienteLoginResponse {
@@ -32,4 +37,19 @@ export function actualizarClientePerfil(data: { nombre: string; empresa: string;
     method: "PUT",
     body: JSON.stringify(data),
   });
+}
+
+export function getSolicitudesPendientes() {
+  return apiFetch<ClienteSolicitud[]>("/admin/clientes/pendientes");
+}
+
+export function getClientesRegistrados() {
+  return apiFetch<ClienteSolicitud[]>("/admin/clientes/");
+}
+
+export function responderSolicitud(clienteId: number, aprobar: boolean) {
+  return apiFetch<ClienteSolicitud>(
+    `/admin/clientes/${clienteId}/${aprobar ? "aprobar" : "rechazar"}`,
+    { method: "PUT" },
+  );
 }

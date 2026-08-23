@@ -33,6 +33,7 @@ export interface Producto {
   slug: string;
   codigo: string;
   descripcion: string | null;
+  equivalencias: string | null;
   precio: number | null;
 
   categoria_id: number;

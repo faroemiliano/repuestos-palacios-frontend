@@ -2,20 +2,32 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { getMediaUrl } from "../../services/api";
-import { getProductosDestacados } from "../../services/producto_services";
+import { getProductos } from "../../services/producto_services";
 import type { Producto } from "../../types/products_type";
 
 function ProductosDestacados() {
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function cargarProductos() {
       try {
-        const response = await getProductosDestacados();
+        setLoading(true);
+        setError(null);
+
+        const response = await getProductos({
+          destacado: true,
+          solo_activos: true,
+          page: pagina,
+          limit: 6,
+          orden: "nombre_asc",
+        });
 
         setProductos(response.items);
+        setTotalPaginas(response.total_paginas);
       } catch (error) {
         console.error("❌ ERROR CARGANDO PRODUCTOS DESTACADOS:", error);
 
@@ -26,7 +38,15 @@ function ProductosDestacados() {
     }
 
     cargarProductos();
-  }, []);
+  }, [pagina]);
+
+  function cambiarPagina(nuevaPagina: number) {
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) {
+      return;
+    }
+
+    setPagina(nuevaPagina);
+  }
 
   return (
     <section className="bg-white">
@@ -113,8 +133,9 @@ function ProductosDestacados() {
                 </p>
               </div>
             ) : (
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {productos.map((producto) => {
+              <>
+                <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {productos.map((producto) => {
                   const imagen =
                     producto.imagenes?.find((imagen) => imagen.principal) ??
                     producto.imagenes?.[0];
@@ -195,8 +216,35 @@ function ProductosDestacados() {
                       </div>
                     </article>
                   );
-                })}
-              </div>
+                  })}
+                </div>
+
+                {totalPaginas > 1 && (
+                  <div className="mt-10 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => cambiarPagina(pagina - 1)}
+                      disabled={pagina === 1}
+                      className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      ← Anterior
+                    </button>
+
+                    <span className="text-sm font-medium text-slate-600">
+                      Página {pagina} de {totalPaginas}
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => cambiarPagina(pagina + 1)}
+                      disabled={pagina === totalPaginas}
+                      className="rounded-xl bg-brand-red px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-red-dark disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Siguiente →
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}

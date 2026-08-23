@@ -20,7 +20,11 @@ function ClienteLoginPage() {
       setProcesando(true);
       const login = await loginClienteWithGoogle(response.credential);
       localStorage.setItem("cliente_token", login.access_token);
-      navigate(login.cliente.perfil_completo ? "/catalogo" : "/mi-cuenta");
+      navigate(
+        login.cliente.perfil_completo && login.cliente.estado === "aprobado"
+          ? "/catalogo"
+          : "/mi-cuenta",
+      );
     } catch (error) {
       console.error(error);
       setError(error instanceof Error ? error.message : "No pudimos iniciar sesión. Intentá nuevamente.");

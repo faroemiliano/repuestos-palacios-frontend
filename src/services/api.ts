@@ -1,4 +1,10 @@
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = (
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
+).replace(/\/$/, "");
+
+const MEDIA_URL = (
+  import.meta.env.VITE_MEDIA_URL || API_URL.replace(/\/api$/, "")
+).replace(/\/$/, "");
 
 export async function apiFetch<T>(
   endpoint: string,
@@ -63,5 +69,5 @@ export function getMediaUrl(url: string): string {
     return url;
   }
 
-  return `http://127.0.0.1:8000${url}`;
+  return `${MEDIA_URL}${url}`;
 }

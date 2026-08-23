@@ -16,7 +16,7 @@ function AdminMarcasPage() {
       setLoading(true);
       setError(null);
 
-      const response = await getMarcas(true);
+      const response = await getMarcas(false);
 
       setMarcas(response);
     } catch (error) {

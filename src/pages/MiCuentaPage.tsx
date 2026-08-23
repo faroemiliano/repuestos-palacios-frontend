@@ -9,6 +9,8 @@ function MiCuentaPage() {
   const [empresa, setEmpresa] = useState("");
   const [email, setEmail] = useState("");
   const [telefono, setTelefono] = useState("");
+  const [estado, setEstado] = useState<"pendiente" | "aprobado" | "rechazado">("pendiente");
+  const [perfilCompleto, setPerfilCompleto] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState("");
@@ -20,6 +22,8 @@ function MiCuentaPage() {
         setEmpresa(cliente.empresa ?? "");
         setEmail(cliente.email);
         setTelefono(cliente.telefono ?? "");
+        setEstado(cliente.estado);
+        setPerfilCompleto(cliente.perfil_completo);
       })
       .catch(() => navigate("/ingresar"))
       .finally(() => setCargando(false));
@@ -30,8 +34,9 @@ function MiCuentaPage() {
     setError("");
     setGuardando(true);
     try {
-      await actualizarClientePerfil({ nombre, empresa, telefono });
-      navigate("/catalogo");
+      const cliente = await actualizarClientePerfil({ nombre, empresa, telefono });
+      setEstado(cliente.estado);
+      setPerfilCompleto(cliente.perfil_completo);
     } catch {
       setError("No se pudieron guardar tus datos. Revisá la información e intentá nuevamente.");
     } finally {
@@ -41,11 +46,19 @@ function MiCuentaPage() {
 
   if (cargando) return <main className="mx-auto max-w-lg px-4 py-20 text-slate-500">Cargando tu cuenta…</main>;
 
+  if (estado === "rechazado") {
+    return <main className="mx-auto max-w-lg px-4 py-16"><div className="rounded-3xl border border-red-200 bg-red-50 p-8"><h1 className="text-2xl font-bold text-slate-900">Solicitud no aprobada</h1><p className="mt-3 text-slate-600">Tu solicitud de acceso fue rechazada. Si creés que es un error, comunicate con Repuestos Palacios.</p></div></main>;
+  }
+
+  if (perfilCompleto && estado === "pendiente") {
+    return <main className="mx-auto max-w-lg px-4 py-16"><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><h1 className="text-2xl font-bold text-slate-900">Solicitud enviada</h1><p className="mt-3 leading-6 text-slate-600">Tus datos fueron enviados al administrador. Cuando apruebe tu cuenta, podrás iniciar sesión y ver los precios.</p></div></main>;
+  }
+
   return (
     <main className="mx-auto max-w-lg px-4 py-16">
       <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm sm:p-9">
         <h1 className="text-2xl font-bold text-slate-900">Completá tus datos</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-500">Necesitamos estos datos para habilitarte los precios del catálogo.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-500">Completá tus datos para enviar la solicitud de acceso. Un administrador deberá aprobarla antes de habilitar los precios.</p>
         <form className="mt-7 space-y-5" onSubmit={guardar}>
           <label className="block text-sm font-semibold text-slate-700">Nombre y apellido
             <input required minLength={2} value={nombre} onChange={(event) => setNombre(event.target.value)} className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-slate-900" />
@@ -61,7 +74,7 @@ function MiCuentaPage() {
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <button disabled={guardando} className="w-full rounded-xl bg-slate-950 px-5 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:opacity-60">
-            {guardando ? "Guardando…" : "Guardar y ver precios"}
+            {guardando ? "Enviando…" : "Enviar solicitud"}
           </button>
         </form>
       </div>

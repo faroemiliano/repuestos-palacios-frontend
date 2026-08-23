@@ -4,12 +4,14 @@ import { Link } from "react-router-dom";
 import { getProductos } from "../../services/producto_services";
 import { getMarcas } from "../../services/marca_services";
 import { apiFetch } from "../../services/api";
+import { getSolicitudesPendientes } from "../../services/cliente_auth_services";
 
 function AdminDashboardPage() {
   const [productos, setProductos] = useState(0);
   const [marcas, setMarcas] = useState(0);
   const [categorias, setCategorias] = useState(0);
   const [consultas, setConsultas] = useState(0);
+  const [solicitudes, setSolicitudes] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,6 +27,7 @@ function AdminDashboardPage() {
           marcasResponse,
           categoriasResponse,
           consultasResponse,
+          solicitudesResponse,
         ] = await Promise.all([
           getProductos({
             solo_activos: false,
@@ -38,12 +41,15 @@ function AdminDashboardPage() {
           apiFetch<any[]>("/categorias/"),
 
           apiFetch<any[]>("/consultas/"),
+
+          getSolicitudesPendientes(),
         ]);
 
         setProductos(productosResponse.total);
         setMarcas(marcasResponse.length);
         setCategorias(categoriasResponse.length);
         setConsultas(consultasResponse.length);
+        setSolicitudes(solicitudesResponse.length);
       } catch (error) {
         console.error("❌ ERROR CARGANDO DASHBOARD:", error);
 
@@ -96,6 +102,21 @@ function AdminDashboardPage() {
             className="mt-4 inline-block text-sm font-semibold text-slate-900 hover:underline"
           >
             Administrar →
+          </Link>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+          <p className="text-sm font-medium text-amber-800">Solicitudes pendientes</p>
+
+          <p className="mt-2 text-3xl font-bold text-slate-900">
+            {loading ? "—" : solicitudes}
+          </p>
+
+          <Link
+            to="/admin/clientes"
+            className="mt-4 inline-block text-sm font-semibold text-amber-900 hover:underline"
+          >
+            Revisar solicitudes →
           </Link>
         </div>
 
@@ -178,6 +199,17 @@ function AdminDashboardPage() {
 
             <p className="mt-1 text-sm text-slate-500">
               Editá productos, imágenes y disponibilidad.
+            </p>
+          </Link>
+
+          <Link
+            to="/admin/precios"
+            className="rounded-xl border border-slate-200 bg-white p-5 transition hover:border-slate-300 hover:shadow-sm"
+          >
+            <p className="font-semibold text-slate-900">Actualizar precios</p>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Aplicá un porcentaje general al catálogo.
             </p>
           </Link>
 

@@ -25,6 +25,8 @@ import AdminCrearCategoriaPage from "./pages/admin/AdminCrearCategorias";
 import AdminEditarCategoriaPage from "./pages/admin/AdminEditarCategoriaPage";
 import ClienteLoginPage from "./pages/ClienteLoginPage";
 import MiCuentaPage from "./pages/MiCuentaPage";
+import AdminClientesPage from "./pages/admin/AdminClientesPage";
+import AdminPreciosPage from "./pages/admin/AdminPreciosPage";
 
 function App() {
   return (
@@ -77,6 +79,8 @@ function App() {
             <Route path="/admin/marcas" element={<AdminMarcasPage />} />
 
             <Route path="/admin/consultas" element={<AdminConsultasPage />} />
+            <Route path="/admin/clientes" element={<AdminClientesPage />} />
+            <Route path="/admin/precios" element={<AdminPreciosPage />} />
 
             <Route
               path="/admin/marcas/nueva"

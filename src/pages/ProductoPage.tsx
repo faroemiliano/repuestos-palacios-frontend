@@ -260,6 +260,16 @@ function ProductoPage() {
             </div>
           )}
 
+          <div className="mt-8">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Equivalencias
+            </p>
+
+            <p className="mt-2 whitespace-pre-line leading-7 text-slate-600">
+              {producto.equivalencias || "Sin equivalencias cargadas."}
+            </p>
+          </div>
+
           {/* Categoría */}
 
           {producto.categoria && (

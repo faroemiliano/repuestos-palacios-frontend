@@ -94,6 +94,30 @@ function AdminLayout() {
               Marcas
             </NavLink>
             <NavLink
+              to="/admin/precios"
+              className={({ isActive }) =>
+                `border-b-2 px-4 py-4 text-sm font-medium transition ${
+                  isActive
+                    ? "border-slate-900 text-slate-900"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
+                }`
+              }
+            >
+              Precios
+            </NavLink>
+            <NavLink
+              to="/admin/clientes"
+              className={({ isActive }) =>
+                `border-b-2 px-4 py-4 text-sm font-medium transition ${
+                  isActive
+                    ? "border-slate-900 text-slate-900"
+                    : "border-transparent text-slate-500 hover:text-slate-900"
+                }`
+              }
+            >
+              Solicitudes
+            </NavLink>
+            <NavLink
               to="/admin/consultas"
               className={({ isActive }) =>
                 `border-b-2 px-4 py-4 text-sm font-medium transition ${

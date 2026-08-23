@@ -40,7 +40,9 @@ function ContactoPage() {
           {/* TELÉFONO */}
 
           <a
-            href="tel:+540000000000"
+            href="https://wa.me/5491144942492"
+            target="_blank"
+            rel="noreferrer"
             className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl sm:p-8"
           >
             <div className="flex items-start justify-between">
@@ -68,15 +70,15 @@ function ContactoPage() {
 
             <div className="mt-7">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Teléfono
+                WhatsApp
               </p>
 
               <p className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                +54 00 0000-0000
+                11 4494-2492
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
-                Hacé clic para comunicarte con nosotros.
+                Hacé clic para escribirnos por WhatsApp.
               </p>
             </div>
 
@@ -86,7 +88,9 @@ function ContactoPage() {
           {/* EMAIL */}
 
           <a
-            href="mailto:contacto@repuestospalacios.com"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=ventasrepuestospalacios%40gmail.com"
+            target="_blank"
+            rel="noreferrer"
             className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl sm:p-8"
           >
             <div className="flex items-start justify-between">
@@ -114,15 +118,15 @@ function ContactoPage() {
 
             <div className="mt-7">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Email
+                Gmail
               </p>
 
               <p className="mt-2 break-all text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                contacto@repuestospalacios.com
+                ventasrepuestospalacios@gmail.com
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
-                Escribinos y respondemos tu consulta.
+                Abrí Gmail para escribirnos y respondemos tu consulta.
               </p>
             </div>
 
