@@ -1,6 +1,6 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { loginClienteWithGoogle } from "../services/cliente_auth_services";
 
@@ -8,6 +8,12 @@ function ClienteLoginPage() {
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [procesando, setProcesando] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("cliente_token")) {
+      navigate("/mi-cuenta", { replace: true });
+    }
+  }, [navigate]);
 
   async function handleGoogleSuccess(response: { credential?: string }) {
     if (!response.credential) {

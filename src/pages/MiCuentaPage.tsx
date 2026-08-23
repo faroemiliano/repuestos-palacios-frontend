@@ -25,7 +25,10 @@ function MiCuentaPage() {
         setEstado(cliente.estado);
         setPerfilCompleto(cliente.perfil_completo);
       })
-      .catch(() => navigate("/ingresar"))
+      .catch(() => {
+        localStorage.removeItem("cliente_token");
+        navigate("/ingresar", { replace: true });
+      })
       .finally(() => setCargando(false));
   }, [navigate]);
 
@@ -44,6 +47,11 @@ function MiCuentaPage() {
     }
   }
 
+  function cerrarSesion() {
+    localStorage.removeItem("cliente_token");
+    navigate("/ingresar", { replace: true });
+  }
+
   if (cargando) return <main className="mx-auto max-w-lg px-4 py-20 text-slate-500">Cargando tu cuenta…</main>;
 
   if (estado === "rechazado") {
@@ -51,7 +59,7 @@ function MiCuentaPage() {
   }
 
   if (perfilCompleto && estado === "pendiente") {
-    return <main className="mx-auto max-w-lg px-4 py-16"><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><h1 className="text-2xl font-bold text-slate-900">Solicitud enviada</h1><p className="mt-3 leading-6 text-slate-600">Tus datos fueron enviados al administrador. Cuando apruebe tu cuenta, podrás iniciar sesión y ver los precios.</p></div></main>;
+    return <main className="mx-auto max-w-lg px-4 py-16"><div className="rounded-3xl border border-amber-200 bg-amber-50 p-8"><p className="text-sm font-semibold uppercase tracking-wider text-amber-700">Solicitud pendiente</p><h1 className="mt-2 text-2xl font-bold text-slate-900">Tu cuenta está esperando aprobación</h1><p className="mt-3 leading-6 text-slate-600">Ya recibimos tus datos. Un administrador debe aprobar el registro antes de que puedas ver los precios.</p><p className="mt-3 text-sm text-slate-500">Cuenta: {email}</p><div className="mt-7 flex flex-col gap-3 sm:flex-row"><button type="button" onClick={() => navigate("/catalogo")} className="rounded-xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">Ver catálogo sin precios</button><button type="button" onClick={cerrarSesion} className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:border-slate-900">Cerrar sesión</button></div></div></main>;
   }
 
   return (
