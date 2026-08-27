@@ -22,6 +22,7 @@ function AdminProductosPage() {
 
         const response = await getProductos({
           buscar: buscar.trim() || undefined,
+          solo_activos: false,
           page,
           limit: 50,
           orden: "nombre_asc",
@@ -63,6 +64,7 @@ function AdminProductosPage() {
       if (pageLuegoDeEliminar === page) {
         const response = await getProductos({
           buscar: buscar.trim() || undefined,
+          solo_activos: false,
           page,
           limit: 50,
           orden: "nombre_asc",
@@ -161,11 +163,15 @@ function AdminProductosPage() {
 
               <tbody className="divide-y divide-slate-200">
                 {productos.map((producto) => (
-                  <tr key={producto.id} className="hover:bg-slate-50">
+                  <tr key={producto.id} className={producto.activo ? "hover:bg-slate-50" : "bg-red-50/80 hover:bg-red-100/70"}>
                     <td className="px-6 py-4">
                       <p className="font-semibold text-slate-900">
                         {producto.nombre}
                       </p>
+
+                      <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${producto.activo ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                        {producto.activo ? "Activo" : "Inactivo"}
+                      </span>
 
                       <p className="mt-1 text-xs text-slate-500">
                         ID: {producto.id}

@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { apiFetch } from "../../services/api";
-import { eliminarCategoria } from "../../services/categoria_services";
-import { getProductos } from "../../services/producto_services";
 import type { Categoria } from "../../types/categoria_types";
 
 function AdminCategoriasPage() {
@@ -14,7 +12,6 @@ function AdminCategoriasPage() {
   );
 
   const [loading, setLoading] = useState(true);
-  const [eliminandoInactivas, setEliminandoInactivas] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function cargarCategorias() {
@@ -59,6 +56,15 @@ function AdminCategoriasPage() {
   }
 
   async function handleCambiarEstado(categoria: Categoria) {
+    if (
+      categoria.activo
+      && !window.confirm(
+        `Desactivar ${categoria.nombre} también desactivará todos sus productos asociados. Después podrás reactivarlos uno por uno. ¿Deseás continuar?`,
+      )
+    ) {
+      return;
+    }
+
     try {
       await apiFetch(`/categorias/${categoria.id}`, {
         method: "PUT",
@@ -84,107 +90,6 @@ function AdminCategoriasPage() {
     }
   }
 
-  async function handleEliminarInactivas() {
-    const inactivas = categorias.filter((categoria) => !categoria.activo);
-
-    if (inactivas.length === 0 || eliminandoInactivas) {
-      return;
-    }
-
-    try {
-      setEliminandoInactivas(true);
-      setError(null);
-
-      const productosPorCategoria = await Promise.all(
-        inactivas.map(async (categoria) => ({
-          categoria,
-          respuestas: await Promise.all([
-            getProductos({ categoria_id: categoria.id, solo_activos: false, page: 1, limit: 1 }),
-            getProductos({ tipo_id: categoria.id, solo_activos: false, page: 1, limit: 1 }),
-            getProductos({ linea_id: categoria.id, solo_activos: false, page: 1, limit: 1 }),
-          ]),
-        })),
-      );
-
-      const categoriasConProductos = productosPorCategoria.filter(
-        ({ respuestas }) => respuestas.some((respuesta) => respuesta.total > 0),
-      );
-
-      if (categoriasConProductos.length > 0) {
-        setError(
-          `No se eliminaron categorías: ${categoriasConProductos.length} tienen productos asociados.`,
-        );
-        return;
-      }
-    } catch (error) {
-      console.error("ERROR VERIFICANDO PRODUCTOS DE CATEGORÍAS:", error);
-      setError(
-        "No se pudo verificar si las categorías tienen productos asociados. No se eliminó ninguna categoría.",
-      );
-      return;
-    } finally {
-      setEliminandoInactivas(false);
-    }
-
-    const confirmar = window.confirm(
-      `Se eliminarán definitivamente ${inactivas.length} ${
-        inactivas.length === 1 ? "categoría inactiva" : "categorías inactivas"
-      }. Esta acción no se puede deshacer.`,
-    );
-
-    if (!confirmar) {
-      return;
-    }
-
-    try {
-      setEliminandoInactivas(true);
-      setError(null);
-
-      const profundidad = (categoria: Categoria): number => {
-        let nivel = 0;
-        let padreId = categoria.categoria_padre_id;
-        while (padreId !== null) {
-          nivel += 1;
-          padreId = categorias.find((item) => item.id === padreId)?.categoria_padre_id ?? null;
-        }
-        return nivel;
-      };
-
-      const inactivasOrdenadas = [...inactivas].sort(
-        (a, b) => profundidad(b) - profundidad(a),
-      );
-
-      const resultados = await Promise.allSettled(
-        inactivasOrdenadas.map((categoria) => eliminarCategoria(categoria.id)),
-      );
-
-      const idsEliminados = new Set(
-        resultados.flatMap((resultado, indice) =>
-          resultado.status === "fulfilled" ? [inactivasOrdenadas[indice].id] : [],
-        ),
-      );
-
-      setCategorias((actuales) =>
-        actuales.filter((categoria) => !idsEliminados.has(categoria.id)),
-      );
-
-      const fallidas = resultados.length - idsEliminados.size;
-
-      if (fallidas > 0) {
-        setError(
-          `${fallidas} ${
-            fallidas === 1 ? "categoría no pudo" : "categorías no pudieron"
-          } eliminarse porque tienen dependencias.`,
-        );
-      }
-    } catch (error) {
-      console.error("ERROR ELIMINANDO CATEGORÍAS INACTIVAS:", error);
-      setError("No se pudieron eliminar las categorías inactivas.");
-    } finally {
-      setEliminandoInactivas(false);
-    }
-  }
-
   function obtenerHijas(categoriaId: number): Categoria[] {
     return categorias.filter(
       (categoria) => categoria.categoria_padre_id === categoriaId,
@@ -194,9 +99,6 @@ function AdminCategoriasPage() {
   const categoriasRaiz = categorias.filter(
     (categoria) => categoria.categoria_padre_id === null,
   );
-
-  const cantidadInactivas = categorias.filter((categoria) => !categoria.activo)
-    .length;
 
   if (loading) {
     return (
@@ -222,19 +124,6 @@ function AdminCategoriasPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          {cantidadInactivas > 0 && (
-            <button
-              type="button"
-              onClick={handleEliminarInactivas}
-              disabled={eliminandoInactivas}
-              className="rounded-lg border border-red-200 px-5 py-3 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {eliminandoInactivas
-                ? "Eliminando..."
-                : `Eliminar ${cantidadInactivas} inactivas`}
-            </button>
-          )}
-
           <Link
             to="/admin/categorias/nueva"
             className="rounded-lg bg-slate-900 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-700"
@@ -283,7 +172,7 @@ function AdminCategoriasPage() {
                 <div key={categoria.id}>
                   {/* CATEGORÍA PADRE */}
 
-                  <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className={`flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between ${!categoria.activo ? "bg-red-50/80" : ""}`}>
                     <div className="flex items-center gap-4">
                       {/* BOTÓN EXPANDIR */}
 
@@ -397,7 +286,7 @@ function AdminCategoriasPage() {
                       {hijas.map((hija) => (
                         <div
                           key={hija.id}
-                          className="flex flex-col gap-4 border-b border-slate-100 px-5 py-4 pl-16 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:pl-24"
+                          className={`flex flex-col gap-4 border-b border-slate-100 px-5 py-4 pl-16 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:pl-24 ${!hija.activo ? "bg-red-100/70" : ""}`}
                         >
                           <div className="flex items-center gap-3">
                             {/* INDICADOR */}

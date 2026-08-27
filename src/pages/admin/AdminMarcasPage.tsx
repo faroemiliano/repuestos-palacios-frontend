@@ -33,6 +33,15 @@ function AdminMarcasPage() {
   }, []);
 
   async function handleCambiarEstado(marcaId: number, activo: boolean) {
+    if (
+      !activo
+      && !window.confirm(
+        "Desactivar esta marca también desactivará todos sus productos. Después podrás reactivarlos uno por uno. ¿Deseás continuar?",
+      )
+    ) {
+      return;
+    }
+
     try {
       await actualizarMarca(marcaId, {
         activo,
@@ -118,7 +127,7 @@ function AdminMarcasPage() {
             {marcas.map((marca) => (
               <div
                 key={marca.id}
-                className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between"
+                className={`flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between ${!marca.activo ? "bg-red-50/80" : ""}`}
               >
                 {/* INFORMACIÓN */}
 
@@ -151,7 +160,7 @@ function AdminMarcasPage() {
                         className={
                           marca.activo
                             ? "rounded-full bg-green-50 px-2.5 py-1 text-xs font-semibold text-green-700"
-                            : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-500"
+                            : "rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700"
                         }
                       >
                         {marca.activo ? "Activa" : "Inactiva"}

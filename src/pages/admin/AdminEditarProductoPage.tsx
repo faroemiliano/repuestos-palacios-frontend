@@ -6,7 +6,6 @@ import { apiFetch, getMediaUrl } from "../../services/api";
 import {
   getProductoById,
   getLineasPorCategoriaYTipo,
-  getTiposPorCategoria,
   updateProducto,
 } from "../../services/producto_services";
 
@@ -18,12 +17,11 @@ import {
 } from "../../services/imagen_producto_services";
 
 import type { Marca } from "../../types/marca_type";
+import type { Categoria } from "../../types/categoria_types";
 import type {
   Producto,
-  ProductoCategoria,
   ProductoImagen,
   ProductoMarca,
-  ProductoTipo,
 } from "../../types/products_type";
 
 function AdminEditarProductoPage() {
@@ -33,7 +31,8 @@ function AdminEditarProductoPage() {
   const [producto, setProducto] = useState<Producto | null>(null);
 
   const [marcas, setMarcas] = useState<Marca[]>([]);
-  const [categorias, setCategorias] = useState<ProductoCategoria[]>([]);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [todasCategorias, setTodasCategorias] = useState<Categoria[]>([]);
 
   const [nombre, setNombre] = useState("");
   const [codigo, setCodigo] = useState("");
@@ -44,7 +43,7 @@ function AdminEditarProductoPage() {
   const [categoriaId, setCategoriaId] = useState("");
   const [tipoId, setTipoId] = useState("");
   const [lineaId, setLineaId] = useState("");
-  const [tipos, setTipos] = useState<ProductoTipo[]>([]);
+  const [tipos, setTipos] = useState<Categoria[]>([]);
   const [lineas, setLineas] = useState<ProductoMarca[]>([]);
   const [activo, setActivo] = useState(true);
   const [destacado, setDestacado] = useState(false);
@@ -78,15 +77,20 @@ function AdminEditarProductoPage() {
           imagenesResponse,
         ] = await Promise.all([
           getProductoById(Number(id)),
-          apiFetch<Marca[]>("/marcas/?solo_activas=true"),
-          apiFetch<ProductoCategoria[]>("/categorias/?solo_activas=true"),
+          apiFetch<Marca[]>("/marcas/?solo_activas=false"),
+          apiFetch<Categoria[]>("/categorias/?solo_activas=false"),
           getImagenesProducto(Number(id)),
         ]);
 
         setProducto(productoResponse);
         setImagenes(imagenesResponse);
         setMarcas(marcasResponse);
-        setCategorias(categoriasResponse);
+        setTodasCategorias(categoriasResponse);
+        setCategorias(
+          categoriasResponse.filter(
+            (categoria) => categoria.categoria_padre_id === null,
+          ),
+        );
 
         setNombre(productoResponse.nombre);
         setCodigo(productoResponse.codigo);
@@ -116,20 +120,58 @@ function AdminEditarProductoPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!categoriaId) { setTipos([]); return; }
-    getTiposPorCategoria(Number(categoriaId))
-      .then((respuesta) => {
-        setTipos(respuesta);
-        if (respuesta.length === 0) setTipoId(categoriaId);
-      })
-      .catch(() => setTipos([]));
-  }, [categoriaId]);
+    if (!categoriaId) {
+      setTipos([]);
+      return;
+    }
+
+    const categoriaSeleccionada = todasCategorias.find(
+      (categoria) => categoria.id === Number(categoriaId),
+    );
+    const hijas = todasCategorias.filter(
+      (categoria) => categoria.categoria_padre_id === Number(categoriaId),
+    );
+    const opciones = hijas.length > 0
+      ? hijas
+      : categoriaSeleccionada
+        ? [categoriaSeleccionada]
+        : [];
+
+    setTipos(opciones);
+    setTipoId((actual) =>
+      opciones.some((tipo) => String(tipo.id) === actual)
+        ? actual
+        : opciones.length === 1
+          ? String(opciones[0].id)
+          : "",
+    );
+  }, [categoriaId, todasCategorias]);
 
   useEffect(() => {
     if (!categoriaId || !tipoId) { setLineas([]); return; }
     getLineasPorCategoriaYTipo(Number(categoriaId), Number(tipoId))
-      .then(setLineas).catch(() => setLineas([]));
-  }, [categoriaId, tipoId]);
+      .then((respuesta) => {
+        if (
+          producto?.linea
+          && producto.categoria_id === Number(categoriaId)
+          && producto.tipo_id === Number(tipoId)
+          && !respuesta.some((linea) => linea.id === producto.linea?.id)
+        ) {
+          setLineas([...respuesta, producto.linea]);
+          return;
+        }
+        setLineas(respuesta);
+      }).catch(() => setLineas(producto?.linea ? [producto.linea] : []));
+  }, [categoriaId, tipoId, producto]);
+
+  const marcaSeleccionada = marcas.find((marca) => marca.id === Number(marcaId));
+  const categoriaSeleccionada = categorias.find((categoria) => categoria.id === Number(categoriaId));
+  const tipoSeleccionado = tipos.find((tipo) => tipo.id === Number(tipoId));
+  const entornoInactivo = Boolean(
+    marcaSeleccionada?.activo === false
+    || categoriaSeleccionada?.activo === false
+    || tipoSeleccionado?.activo === false,
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -361,7 +403,7 @@ function AdminEditarProductoPage() {
 
               {marcas.map((marca) => (
                 <option key={marca.id} value={marca.id}>
-                  {marca.nombre}
+                  {marca.nombre}{!marca.activo ? " — inactiva" : ""}
                 </option>
               ))}
             </select>
@@ -384,7 +426,7 @@ function AdminEditarProductoPage() {
 
               {categorias.map((categoria) => (
                 <option key={categoria.id} value={categoria.id}>
-                  {categoria.nombre}
+                  {categoria.nombre}{!categoria.activo ? " — inactiva" : ""}
                 </option>
               ))}
             </select>
@@ -394,7 +436,7 @@ function AdminEditarProductoPage() {
             <label className="text-sm font-medium text-slate-700">Tipo</label>
             <select value={tipoId} onChange={(event) => { setTipoId(event.target.value); setLineaId(""); }} required disabled={Boolean(categoriaId) && tipos.length === 0} className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 outline-none focus:border-slate-900 disabled:opacity-60">
               <option value="">{tipos.length === 0 && categoriaId ? "Sin tipo" : "Seleccionar tipo"}</option>
-              {tipos.map((tipo) => <option key={tipo.id} value={tipo.id}>{tipo.nombre}</option>)}
+              {tipos.map((tipo) => <option key={tipo.id} value={tipo.id}>{tipo.nombre}{!tipo.activo ? " — inactivo" : ""}</option>)}
             </select>
           </div>
 
@@ -554,6 +596,11 @@ function AdminEditarProductoPage() {
         {/* ESTADOS */}
 
         <div className="mt-8 space-y-4 border-t border-slate-200 pt-6">
+          {entornoInactivo && (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              Podés activar este producto individualmente. Permanecerá oculto para los clientes mientras su categoría, tipo o marca continúe inactiva.
+            </p>
+          )}
           <label className="flex items-center gap-3">
             <input
               type="checkbox"
