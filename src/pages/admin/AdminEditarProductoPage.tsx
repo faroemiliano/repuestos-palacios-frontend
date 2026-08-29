@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { apiFetch, getMediaUrl } from "../../services/api";
 
@@ -27,6 +27,10 @@ import type {
 function AdminEditarProductoPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const volverAProductos = searchParams.toString()
+    ? `/admin/productos?${searchParams.toString()}`
+    : "/admin/productos";
 
   const [producto, setProducto] = useState<Producto | null>(null);
 
@@ -198,7 +202,7 @@ function AdminEditarProductoPage() {
         destacado,
       });
 
-      navigate("/admin/productos");
+      navigate(volverAProductos);
     } catch (error) {
       console.error("❌ ERROR ACTUALIZANDO PRODUCTO:", error);
 
@@ -317,7 +321,7 @@ function AdminEditarProductoPage() {
         </div>
 
         <Link
-          to="/admin/productos"
+          to={volverAProductos}
           className="mt-6 inline-block text-sm font-semibold text-slate-900 hover:underline"
         >
           ← Volver a productos
@@ -328,7 +332,7 @@ function AdminEditarProductoPage() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
       <Link
-        to="/admin/productos"
+        to={volverAProductos}
         className="text-sm font-semibold text-slate-600 hover:text-slate-900"
       >
         ← Volver a productos
@@ -632,7 +636,7 @@ function AdminEditarProductoPage() {
 
         <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <Link
-            to="/admin/productos"
+            to={volverAProductos}
             className="rounded-lg border border-slate-300 px-5 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             Cancelar

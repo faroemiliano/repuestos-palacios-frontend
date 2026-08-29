@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { getMediaUrl } from "../../services/api";
 import { getProductos } from "../../services/producto_services";
 import type { Producto } from "../../types/products_type";
+import Paginacion from "../paginacion/Paginacion";
 
 function ProductosDestacados() {
   const [productos, setProductos] = useState<Producto[]>([]);
@@ -220,28 +221,12 @@ function ProductosDestacados() {
                 </div>
 
                 {totalPaginas > 1 && (
-                  <div className="mt-10 flex items-center justify-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => cambiarPagina(pagina - 1)}
-                      disabled={pagina === 1}
-                      className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      ← Anterior
-                    </button>
-
-                    <span className="text-sm font-medium text-slate-600">
-                      Página {pagina} de {totalPaginas}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={() => cambiarPagina(pagina + 1)}
-                      disabled={pagina === totalPaginas}
-                      className="rounded-xl bg-brand-red px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-red-dark disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Siguiente →
-                    </button>
+                  <div className="mt-10">
+                    <Paginacion
+                      paginaActual={pagina}
+                      totalPaginas={totalPaginas}
+                      onCambiarPagina={cambiarPagina}
+                    />
                   </div>
                 )}
               </>

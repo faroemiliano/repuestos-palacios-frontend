@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { getProductos } from "../../services/producto_services";
 import type { Producto } from "../../types/products_type";
 import { apiFetch } from "../../services/api";
+import Paginacion from "../../components/paginacion/Paginacion";
 
 function AdminProductosPage() {
+  const [searchParams] = useSearchParams();
+  const paginaInicial = Math.max(1, Number(searchParams.get("page")) || 1);
+  const busquedaInicial = searchParams.get("buscar") ?? "";
+
   const [productos, setProductos] = useState<Producto[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(paginaInicial);
   const [total, setTotal] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
-  const [buscar, setBuscar] = useState("");
+  const [buscar, setBuscar] = useState(busquedaInicial);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const contextoListado = new URLSearchParams({ page: String(page) });
+
+  if (buscar.trim()) {
+    contextoListado.set("buscar", buscar.trim());
+  }
 
   useEffect(() => {
     async function cargarProductos() {
@@ -201,7 +212,7 @@ function AdminProductosPage() {
                         </Link>
 
                         <Link
-                          to={`/admin/productos/${producto.id}/editar`}
+                          to={`/admin/productos/${producto.id}/editar?${contextoListado.toString()}`}
                           className="text-sm font-semibold text-slate-900 hover:underline"
                         >
                           Editar
@@ -236,25 +247,11 @@ function AdminProductosPage() {
                 {total} productos · Página {page} de {totalPaginas}
               </p>
 
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={page === 1}
-                  onClick={() => setPage((pagina) => pagina - 1)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  ← Anterior
-                </button>
-
-                <button
-                  type="button"
-                  disabled={page === totalPaginas}
-                  onClick={() => setPage((pagina) => pagina + 1)}
-                  className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  Siguiente →
-                </button>
-              </div>
+              <Paginacion
+                paginaActual={page}
+                totalPaginas={totalPaginas}
+                onCambiarPagina={setPage}
+              />
             </div>
           )}
         </div>

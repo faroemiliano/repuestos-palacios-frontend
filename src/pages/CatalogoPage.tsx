@@ -17,6 +17,7 @@ import type {
 } from "../types/products_type";
 
 import ProductoCard from "../components/productos/ProductoCard";
+import Paginacion from "../components/paginacion/Paginacion";
 import SEO from "../components/seo/SEO";
 
 function CatalogoPage() {
@@ -833,28 +834,12 @@ function CatalogoPage() {
                 ================================================= */}
 
                 {totalPaginas > 1 && (
-                  <div className="mt-10 flex items-center justify-center gap-2">
-                    <button
-                      type="button"
-                      disabled={page <= 1}
-                      onClick={() => handlePageChange(page - 1)}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      ← Anterior
-                    </button>
-
-                    <span className="px-3 text-sm font-medium text-slate-600">
-                      Página {page} de {totalPaginas}
-                    </span>
-
-                    <button
-                      type="button"
-                      disabled={page >= totalPaginas}
-                      onClick={() => handlePageChange(page + 1)}
-                      className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Siguiente →
-                    </button>
+                  <div className="mt-10">
+                    <Paginacion
+                      paginaActual={page}
+                      totalPaginas={totalPaginas}
+                      onCambiarPagina={handlePageChange}
+                    />
                   </div>
                 )}
               </>
